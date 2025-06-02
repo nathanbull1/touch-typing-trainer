@@ -1,0 +1,1173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Touch Typing Trainer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .auth-section, .main-app {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .auth-section {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .auth-form input {
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .auth-form input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e1e5e9;
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .nav-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-weight: 600;
+        }
+
+        .lesson-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .lesson-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .lesson-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+
+        .lesson-card.completed {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border-color: #28a745;
+        }
+
+        .typing-area {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .text-display {
+            font-size: 1.5rem;
+            line-height: 2;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .text-display .correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .text-display .incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .text-display .current {
+            background-color: #fff3cd;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        .typing-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .typing-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .keyboard {
+            background: #2c3e50;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .keyboard-row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 8px;
+            gap: 4px;
+        }
+
+        .key {
+            background: #34495e;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 12px;
+            min-width: 40px;
+            font-size: 14px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .key.active {
+            background: #e74c3c;
+            transform: scale(1.1);
+        }
+
+        .key.space {
+            min-width: 200px;
+        }
+
+        .progress-section {
+            margin-top: 30px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e1e5e9;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+        }
+
+        .test-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .test-option {
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .test-option:hover, .test-option.selected {
+            border-color: #667eea;
+            background: #e8f0fe;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Touch Typing Trainer</h1>
+            <p>Master the art of typing without looking at the keyboard</p>
+        </div>
+
+        <!-- Authentication Section -->
+        <div id="auth-section" class="auth-section">
+            <div id="login-form">
+                <h2 style="text-align: center; margin-bottom: 20px;">Welcome Back</h2>
+                <div class="auth-form">
+                    <input type="text" id="login-username" placeholder="Username" required>
+                    <input type="password" id="login-password" placeholder="Password" required>
+                    <button class="btn btn-primary" onclick="login()">Login</button>
+                    <button class="btn btn-secondary" onclick="showRegister()">Create Account</button>
+                </div>
+            </div>
+
+            <div id="register-form" class="hidden">
+                <h2 style="text-align: center; margin-bottom: 20px;">Create Account</h2>
+                <div class="auth-form">
+                    <input type="text" id="register-username" placeholder="Username" required>
+                    <input type="email" id="register-email" placeholder="Email" required>
+                    <input type="password" id="register-password" placeholder="Password" required>
+                    <button class="btn btn-primary" onclick="register()">Create Account</button>
+                    <button class="btn btn-secondary" onclick="showLogin()">Back to Login</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Application -->
+        <div id="main-app" class="main-app hidden">
+            <div class="user-info">
+                <div>
+                    <h3>Welcome, <span id="current-user"></span>!</h3>
+                    <p>Level: <span id="user-level">1</span> | WPM Best: <span id="user-best-wpm">0</span></p>
+                </div>
+                <button class="btn btn-secondary" onclick="logout()">Logout</button>
+            </div>
+
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="showTab('practice')">Practice Mode</button>
+                <button class="nav-tab" onclick="showTab('test')">Test Mode</button>
+                <button class="nav-tab" onclick="showTab('progress')">Progress</button>
+            </div>
+
+            <!-- Practice Mode -->
+            <div id="practice-tab" class="tab-content">
+                <h2>Practice Mode</h2>
+                <p style="margin-bottom: 20px;">Choose a lesson to practice specific keys and combinations</p>
+                
+                <div id="lesson-selection">
+                    <div class="lesson-grid">
+                        <div class="lesson-card" onclick="startLesson(1)">
+                            <h3>Lesson 1</h3>
+                            <p>Home Row (ASDF JKL;)</p>
+                            <div class="lesson-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                                <small>0% Complete</small>
+                            </div>
+                        </div>
+                        <div class="lesson-card" onclick="startLesson(2)">
+                            <h3>Lesson 2</h3>
+                            <p>Top Row (QWERT YUIOP)</p>
+                            <div class="lesson-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                                <small>0% Complete</small>
+                            </div>
+                        </div>
+                        <div class="lesson-card" onclick="startLesson(3)">
+                            <h3>Lesson 3</h3>
+                            <p>Bottom Row (ZXCVB NM,.)</p>
+                            <div class="lesson-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                                <small>0% Complete</small>
+                            </div>
+                        </div>
+                        <div class="lesson-card" onclick="startLesson(4)">
+                            <h3>Lesson 4</h3>
+                            <p>Numbers (1234567890)</p>
+                            <div class="lesson-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                                <small>0% Complete</small>
+                            </div>
+                        </div>
+                        <div class="lesson-card" onclick="startLesson(5)">
+                            <h3>Lesson 5</h3>
+                            <p>Common Words</p>
+                            <div class="lesson-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                                <small>0% Complete</small>
+                            </div>
+                        </div>
+                        <div class="lesson-card" onclick="startLesson(6)">
+                            <h3>Lesson 6</h3>
+                            <p>Sentences</p>
+                            <div class="lesson-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 0%"></div>
+                                </div>
+                                <small>0% Complete</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="practice-area" class="hidden">
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-value" id="practice-wpm">0</div>
+                            <div>WPM</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="practice-accuracy">100</div>
+                            <div>Accuracy %</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="practice-time">0</div>
+                            <div>Time (s)</div>
+                        </div>
+                    </div>
+
+                    <div class="typing-area">
+                        <div class="text-display" id="practice-text"></div>
+                        <input type="text" class="typing-input" id="practice-input" placeholder="Start typing here..." autocomplete="off" spellcheck="false">
+                    </div>
+
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <button class="btn btn-primary" onclick="resetPractice()">Reset</button>
+                        <button class="btn btn-secondary" onclick="backToLessons()">Back to Lessons</button>
+                    </div>
+
+                    <div class="keyboard" id="virtual-keyboard">
+                        <div class="keyboard-row">
+                            <button class="key" data-key="`">~<br>`</button>
+                            <button class="key" data-key="1">!<br>1</button>
+                            <button class="key" data-key="2">@<br>2</button>
+                            <button class="key" data-key="3">#<br>3</button>
+                            <button class="key" data-key="4">$<br>4</button>
+                            <button class="key" data-key="5">%<br>5</button>
+                            <button class="key" data-key="6">^<br>6</button>
+                            <button class="key" data-key="7">&<br>7</button>
+                            <button class="key" data-key="8">*<br>8</button>
+                            <button class="key" data-key="9">(<br>9</button>
+                            <button class="key" data-key="0">)<br>0</button>
+                            <button class="key" data-key="-">_<br>-</button>
+                            <button class="key" data-key="=">+<br>=</button>
+                        </div>
+                        <div class="keyboard-row">
+                            <button class="key" data-key="q">Q</button>
+                            <button class="key" data-key="w">W</button>
+                            <button class="key" data-key="e">E</button>
+                            <button class="key" data-key="r">R</button>
+                            <button class="key" data-key="t">T</button>
+                            <button class="key" data-key="y">Y</button>
+                            <button class="key" data-key="u">U</button>
+                            <button class="key" data-key="i">I</button>
+                            <button class="key" data-key="o">O</button>
+                            <button class="key" data-key="p">P</button>
+                            <button class="key" data-key="[">{<br>[</button>
+                            <button class="key" data-key="]">}<br>]</button>
+                            <button class="key" data-key="\">|<br>\</button>
+                        </div>
+                        <div class="keyboard-row">
+                            <button class="key" data-key="a">A</button>
+                            <button class="key" data-key="s">S</button>
+                            <button class="key" data-key="d">D</button>
+                            <button class="key" data-key="f">F</button>
+                            <button class="key" data-key="g">G</button>
+                            <button class="key" data-key="h">H</button>
+                            <button class="key" data-key="j">J</button>
+                            <button class="key" data-key="k">K</button>
+                            <button class="key" data-key="l">L</button>
+                            <button class="key" data-key=";">:<br>;</button>
+                            <button class="key" data-key="'">"<br>'</button>
+                        </div>
+                        <div class="keyboard-row">
+                            <button class="key" data-key="z">Z</button>
+                            <button class="key" data-key="x">X</button>
+                            <button class="key" data-key="c">C</button>
+                            <button class="key" data-key="v">V</button>
+                            <button class="key" data-key="b">B</button>
+                            <button class="key" data-key="n">N</button>
+                            <button class="key" data-key="m">M</button>
+                            <button class="key" data-key=","><</button>
+                            <button class="key" data-key=".">></button>
+                            <button class="key" data-key="/">?</button>
+                        </div>
+                        <div class="keyboard-row">
+                            <button class="key space" data-key=" ">Space</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Mode -->
+            <div id="test-tab" class="tab-content hidden">
+                <h2>Test Mode</h2>
+                <p style="margin-bottom: 20px;">Test your typing speed and accuracy</p>
+
+                <div id="test-setup">
+                    <div class="test-options">
+                        <div class="test-option selected" onclick="selectTestDuration(60)">
+                            <h3>1 Minute</h3>
+                            <p>Quick test</p>
+                        </div>
+                        <div class="test-option" onclick="selectTestDuration(120)">
+                            <h3>2 Minutes</h3>
+                            <p>Standard test</p>
+                        </div>
+                        <div class="test-option" onclick="selectTestDuration(300)">
+                            <h3>5 Minutes</h3>
+                            <p>Extended test</p>
+                        </div>
+                    </div>
+                    <div style="text-align: center;">
+                        <button class="btn btn-primary" onclick="startTest()">Start Test</button>
+                    </div>
+                </div>
+
+                <div id="test-area" class="hidden">
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-value" id="test-wpm">0</div>
+                            <div>WPM</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="test-accuracy">100</div>
+                            <div>Accuracy %</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="test-time">60</div>
+                            <div>Time Left</div>
+                        </div>
+                    </div>
+
+                    <div class="typing-area">
+                        <div class="text-display" id="test-text"></div>
+                        <input type="text" class="typing-input" id="test-input" placeholder="Start typing when ready..." autocomplete="off" spellcheck="false">
+                    </div>
+
+                    <div style="text-align: center;">
+                        <button class="btn btn-secondary" onclick="endTest()">End Test</button>
+                    </div>
+                </div>
+
+                <div id="test-results" class="hidden">
+                    <h3>Test Results</h3>
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div class="stat-value" id="final-wpm">0</div>
+                            <div>Final WPM</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="final-accuracy">100</div>
+                            <div>Final Accuracy</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="final-chars">0</div>
+                            <div>Characters Typed</div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <button class="btn btn-primary" onclick="newTest()">New Test</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Tab -->
+            <div id="progress-tab" class="tab-content hidden">
+                <h2>Your Progress</h2>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-tests">0</div>
+                        <div>Tests Completed</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avg-wpm">0</div>
+                        <div>Average WPM</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="best-wpm">0</div>
+                        <div>Best WPM</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avg-accuracy">0</div>
+                        <div>Average Accuracy</div>
+                    </div>
+                </div>
+
+                <div class="progress-section">
+                    <h3>Lesson Progress</h3>
+                    <div id="lesson-progress-list">
+                        <!-- Progress bars for each lesson will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application state
+        let currentUser = null;
+        let currentLesson = null;
+        let currentTab = 'practice';
+        let practiceStartTime = null;
+        let testStartTime = null;
+        let testDuration = 60;
+        let testTimer = null;
+        let practiceTimer = null;
+
+        // Lesson data
+        const lessons = {
+            1: {
+                title: "Home Row",
+                text: "asdf jkl; asdf jkl; aaa sss ddd fff jjj kkk lll ;;; asdf jkl; fdsa ;lkj",
+                keys: ['a', 's', 'd', 'f', 'j', 'k', 'l', ';']
+            },
+            2: {
+                title: "Top Row",
+                text: "qwert yuiop qwer tyui qwerty uiop qwer tyui qwerty uiop",
+                keys: ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p']
+            },
+            3: {
+                title: "Bottom Row",
+                text: "zxcvb nm,. zxcv bnm, zxcvb nm,. zxcv bnm, zxcvbnm",
+                keys: ['z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.']
+            },
+            4: {
+                title: "Numbers",
+                text: "1234567890 123 456 789 1234567890 123 456 789 1234567890",
+                keys: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+            },
+            5: {
+                title: "Common Words",
+                text: "the and for are but not you all can had her was one our out day get has him his how its may new now old see two who boy did men run can you see the cat and dog run fast today",
+                keys: []
+            },
+            6: {
+                title: "Sentences",
+                text: "The quick brown fox jumps over the lazy dog. Pack my box with five dozen liquor jugs. How vexingly quick daft zebras jump!",
+                keys: []
+            }
+        };
+
+        // Test texts
+        const testTexts = [
+            "The quick brown fox jumps over the lazy dog. This pangram contains every letter of the alphabet and is commonly used for typing practice. It helps improve both speed and accuracy when learning to type.",
+            "Technology has revolutionized the way we communicate and work. From smartphones to artificial intelligence, we are living in an era of unprecedented innovation and digital transformation.",
+            "Learning to touch type is an essential skill in today's digital world. With practice and dedication, anyone can master the keyboard and significantly improve their typing speed and accuracy.",
+            "The art of writing has evolved from ancient cave paintings to modern digital texts. Each generation has found new ways to express ideas and preserve knowledge for future generations."
+        ];
+
+        // Initialize the application
+        function init() {
+            loadUserData();
+            updateUI();
+        }
+
+        // Authentication functions
+        function showLogin() {
+            document.getElementById('login-form').classList.remove('hidden');
+            document.getElementById('register-form').classList.add('hidden');
+        }
+
+        function showRegister() {
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('register-form').classList.remove('hidden');
+        }
+
+        function register() {
+            const username = document.getElementById('register-username').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+
+            if (!username || !email || !password) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            // Store user data in memory for this session
+            const userData = {
+                username: username,
+                email: email,
+                password: password, // In a real app, this would be hashed
+                level: 1,
+                bestWPM: 0,
+                testsCompleted: 0,
+                totalWPM: 0,
+                totalAccuracy: 0,
+                lessonProgress: {}
+            };
+
+            currentUser = userData;
+            saveUserData(); // This will work when deployed to GitHub Pages
+            showMainApp();
+        }
+
+        function login() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            if (!username || !password) {
+                alert('Please enter username and password');
+                return;
+            }
+
+            // For demo purposes, allow any login and create a demo user
+            currentUser = {
+                username: username,
+                level: 1,
+                bestWPM: 0,
+                testsCompleted: 0,
+                totalWPM: 0,
+                totalAccuracy: 0,
+                lessonProgress: {}
+            };
+            
+            saveUserData(); // This will work when deployed to GitHub Pages
+            showMainApp();
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('main-app').classList.add('hidden');
+            showLogin();
+        }
+
+        function showMainApp() {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            updateUserInfo();
+            updateProgressDisplay();
+        }
+
+        function updateUserInfo() {
+            if (currentUser) {
+                document.getElementById('current-user').textContent = currentUser.username;
+                document.getElementById('user-level').textContent = currentUser.level;
+                document.getElementById('user-best-wpm').textContent = currentUser.bestWPM;
+            }
+        }
+
+        // Tab navigation
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+
+            // Remove active class from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab and mark nav tab as active
+            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+            event.target.classList.add('active');
+            currentTab = tabName;
+
+            if (tabName === 'progress') {
+                updateProgressDisplay();
+            }
+        }
+
+        // Practice mode functions
+        function startLesson(lessonNumber) {
+            currentLesson = lessonNumber;
+            document.getElementById('lesson-selection').classList.add('hidden');
+            document.getElementById('practice-area').classList.remove('hidden');
+            
+            const lesson = lessons[lessonNumber];
+            displayText('practice-text', lesson.text);
+            
+            const input = document.getElementById('practice-input');
+            input.value = '';
+            input.focus();
+            
+            // Reset stats
+            practiceStartTime = null;
+            updateStats('practice', 0, 100, 0);
+            
+            // Add event listeners
+            input.addEventListener('input', handlePracticeInput);
+            input.addEventListener('keydown', handleKeyPress);
+        }
+
+        function handlePracticeInput(event) {
+            if (!practiceStartTime) {
+                practiceStartTime = Date.now();
+                startPracticeTimer();
+            }
+            
+            const input = event.target.value;
+            const lesson = lessons[currentLesson];
+            const targetText = lesson.text;
+            
+            updateTextDisplay('practice-text', targetText, input);
+            updatePracticeStats(input, targetText);
+            highlightCurrentKey(targetText, input.length);
+            
+            // Check if lesson is complete
+            if (input === targetText) {
+                completePractice();
+            }
+        }
+
+        function handleKeyPress(event) {
+            // Prevent default for certain keys to avoid browser shortcuts
+            if (event.key === 'Tab') {
+                event.preventDefault();
+            }
+        }
+
+        function startPracticeTimer() {
+            practiceTimer = setInterval(() => {
+                if (practiceStartTime) {
+                    const elapsed = Math.floor((Date.now() - practiceStartTime) / 1000);
+                    document.getElementById('practice-time').textContent = elapsed;
+                }
+            }, 1000);
+        }
+
+        function updateTextDisplay(elementId, targetText, userInput) {
+            const display = document.getElementById(elementId);
+            let html = '';
+            
+            for (let i = 0; i < targetText.length; i++) {
+                const char = targetText[i];
+                if (i < userInput.length) {
+                    if (userInput[i] === char) {
+                        html += `<span class="correct">${char === ' ' ? '&nbsp;' : char}</span>`;
+                    } else {
+                        html += `<span class="incorrect">${char === ' ' ? '&nbsp;' : char}</span>`;
+                    }
+                } else if (i === userInput.length) {
+                    html += `<span class="current">${char === ' ' ? '&nbsp;' : char}</span>`;
+                } else {
+                    html += char === ' ' ? '&nbsp;' : char;
+                }
+            }
+            
+            display.innerHTML = html;
+        }
+
+        function updatePracticeStats(userInput, targetText) {
+            if (!practiceStartTime) return;
+            
+            const elapsed = (Date.now() - practiceStartTime) / 1000 / 60; // minutes
+            const wordsTyped = userInput.length / 5; // standard word length
+            const wpm = Math.round(wordsTyped / elapsed) || 0;
+            
+            let correctChars = 0;
+            for (let i = 0; i < userInput.length; i++) {
+                if (userInput[i] === targetText[i]) {
+                    correctChars++;
+                }
+            }
+            
+            const accuracy = userInput.length > 0 ? Math.round((correctChars / userInput.length) * 100) : 100;
+            const time = Math.floor((Date.now() - practiceStartTime) / 1000);
+            
+            updateStats('practice', wpm, accuracy, time);
+        }
+
+        function updateStats(mode, wpm, accuracy, time) {
+            document.getElementById(`${mode}-wpm`).textContent = wpm;
+            document.getElementById(`${mode}-accuracy`).textContent = accuracy;
+            if (mode === 'practice') {
+                document.getElementById(`${mode}-time`).textContent = time;
+            } else {
+                document.getElementById(`${mode}-time`).textContent = time;
+            }
+        }
+
+        function highlightCurrentKey(targetText, position) {
+            // Remove all active key highlights
+            document.querySelectorAll('.key').forEach(key => {
+                key.classList.remove('active');
+            });
+            
+            if (position < targetText.length) {
+                const currentChar = targetText[position].toLowerCase();
+                const keyElement = document.querySelector(`[data-key="${currentChar}"]`);
+                if (keyElement) {
+                    keyElement.classList.add('active');
+                }
+            }
+        }
+
+        function completePractice() {
+            clearInterval(practiceTimer);
+            
+            // Update lesson progress
+            if (!currentUser.lessonProgress[currentLesson]) {
+                currentUser.lessonProgress[currentLesson] = 0;
+            }
+            currentUser.lessonProgress[currentLesson] = Math.min(100, currentUser.lessonProgress[currentLesson] + 20);
+            
+            // Update user level
+            const completedLessons = Object.keys(currentUser.lessonProgress).filter(
+                lesson => currentUser.lessonProgress[lesson] >= 100
+            ).length;
+            currentUser.level = Math.max(1, completedLessons);
+            
+            saveUserData();
+            alert('Lesson completed! Great job!');
+            updateLessonProgress();
+        }
+
+        function resetPractice() {
+            const input = document.getElementById('practice-input');
+            input.value = '';
+            practiceStartTime = null;
+            clearInterval(practiceTimer);
+            
+            const lesson = lessons[currentLesson];
+            displayText('practice-text', lesson.text);
+            updateStats('practice', 0, 100, 0);
+            
+            // Remove key highlights
+            document.querySelectorAll('.key').forEach(key => {
+                key.classList.remove('active');
+            });
+            
+            input.focus();
+        }
+
+        function backToLessons() {
+            clearInterval(practiceTimer);
+            document.getElementById('practice-area').classList.add('hidden');
+            document.getElementById('lesson-selection').classList.remove('hidden');
+            currentLesson = null;
+            updateLessonProgress();
+        }
+
+        function displayText(elementId, text) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = text;
+        }
+
+        // Test mode functions
+        function selectTestDuration(duration) {
+            testDuration = duration;
+            document.querySelectorAll('.test-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            event.target.closest('.test-option').classList.add('selected');
+        }
+
+        function startTest() {
+            document.getElementById('test-setup').classList.add('hidden');
+            document.getElementById('test-area').classList.remove('hidden');
+            
+            // Select random test text
+            const randomText = testTexts[Math.floor(Math.random() * testTexts.length)];
+            displayText('test-text', randomText);
+            
+            const input = document.getElementById('test-input');
+            input.value = '';
+            input.focus();
+            
+            // Reset stats
+            testStartTime = null;
+            updateStats('test', 0, 100, testDuration);
+            
+            // Add event listeners
+            input.addEventListener('input', handleTestInput);
+        }
+
+        function handleTestInput(event) {
+            if (!testStartTime) {
+                testStartTime = Date.now();
+                startTestTimer();
+            }
+            
+            const input = event.target.value;
+            const targetText = document.getElementById('test-text').textContent;
+            
+            updateTextDisplay('test-text', targetText, input);
+            updateTestStats(input, targetText);
+        }
+
+        function startTestTimer() {
+            let timeLeft = testDuration;
+            
+            testTimer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('test-time').textContent = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    endTest();
+                }
+            }, 1000);
+        }
+
+        function updateTestStats(userInput, targetText) {
+            if (!testStartTime) return;
+            
+            const elapsed = (Date.now() - testStartTime) / 1000 / 60; // minutes
+            const wordsTyped = userInput.length / 5; // standard word length
+            const wpm = Math.round(wordsTyped / elapsed) || 0;
+            
+            let correctChars = 0;
+            for (let i = 0; i < userInput.length; i++) {
+                if (userInput[i] === targetText[i]) {
+                    correctChars++;
+                }
+            }
+            
+            const accuracy = userInput.length > 0 ? Math.round((correctChars / userInput.length) * 100) : 100;
+            
+            updateStats('test', wpm, accuracy, document.getElementById('test-time').textContent);
+        }
+
+        function endTest() {
+            clearInterval(testTimer);
+            
+            const finalWPM = parseInt(document.getElementById('test-wpm').textContent);
+            const finalAccuracy = parseInt(document.getElementById('test-accuracy').textContent);
+            const charsTyped = document.getElementById('test-input').value.length;
+            
+            // Update user stats
+            currentUser.testsCompleted++;
+            currentUser.totalWPM += finalWPM;
+            currentUser.totalAccuracy += finalAccuracy;
+            currentUser.bestWPM = Math.max(currentUser.bestWPM, finalWPM);
+            
+            saveUserData();
+            
+            // Show results
+            document.getElementById('test-area').classList.add('hidden');
+            document.getElementById('test-results').classList.remove('hidden');
+            
+            document.getElementById('final-wpm').textContent = finalWPM;
+            document.getElementById('final-accuracy').textContent = finalAccuracy;
+            document.getElementById('final-chars').textContent = charsTyped;
+            
+            updateUserInfo();
+        }
+
+        function newTest() {
+            document.getElementById('test-results').classList.add('hidden');
+            document.getElementById('test-setup').classList.remove('hidden');
+            
+            // Remove event listeners
+            const input = document.getElementById('test-input');
+            input.removeEventListener('input', handleTestInput);
+        }
+
+        // Progress tracking functions
+        function updateProgressDisplay() {
+            if (!currentUser) return;
+            
+            document.getElementById('total-tests').textContent = currentUser.testsCompleted;
+            document.getElementById('best-wpm').textContent = currentUser.bestWPM;
+            
+            const avgWPM = currentUser.testsCompleted > 0 ? 
+                Math.round(currentUser.totalWPM / currentUser.testsCompleted) : 0;
+            document.getElementById('avg-wpm').textContent = avgWPM;
+            
+            const avgAccuracy = currentUser.testsCompleted > 0 ? 
+                Math.round(currentUser.totalAccuracy / currentUser.testsCompleted) : 0;
+            document.getElementById('avg-accuracy').textContent = avgAccuracy;
+            
+            updateLessonProgressList();
+        }
+
+        function updateLessonProgressList() {
+            const container = document.getElementById('lesson-progress-list');
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= 6; i++) {
+                const progress = currentUser.lessonProgress[i] || 0;
+                const lessonDiv = document.createElement('div');
+                lessonDiv.style.marginBottom = '15px';
+                
+                lessonDiv.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>Lesson ${i}: ${lessons[i].title}</span>
+                        <span>${progress}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progress}%"></div>
+                    </div>
+                `;
+                
+                container.appendChild(lessonDiv);
+            }
+        }
+
+        function updateLessonProgress() {
+            document.querySelectorAll('.lesson-card').forEach((card, index) => {
+                const lessonNumber = index + 1;
+                const progress = currentUser.lessonProgress[lessonNumber] || 0;
+                
+                const progressBar = card.querySelector('.progress-fill');
+                const progressText = card.querySelector('small');
+                
+                if (progressBar && progressText) {
+                    progressBar.style.width = `${progress}%`;
+                    progressText.textContent = `${progress}% Complete`;
+                }
+                
+                if (progress >= 100) {
+                    card.classList.add('completed');
+                }
+            });
+        }
+
+        // Data persistence functions
+        function saveUserData() {
+            // In the artifact environment, we'll just keep data in memory
+            // When you deploy to GitHub Pages, this will use localStorage
+            if (typeof(Storage) !== "undefined" && !window.location.href.includes('claude.ai')) {
+                try {
+                    localStorage.setItem('typingTrainerUser', JSON.stringify(currentUser));
+                } catch (e) {
+                    console.log('localStorage not available, using session storage');
+                }
+            }
+        }
+
+        function loadUserData() {
+            // In the artifact environment, we'll skip auto-loading
+            // When you deploy to GitHub Pages, this will load from localStorage
+            if (typeof(Storage) !== "undefined" && !window.location.href.includes('claude.ai')) {
+                try {
+                    const storedUser = localStorage.getItem('typingTrainerUser');
+                    if (storedUser) {
+                        const userData = JSON.parse(storedUser);
+                        currentUser = userData;
+                        showMainApp();
+                    }
+                } catch (e) {
+                    console.log('Error loading user data:', e);
+                }
+            }
+        }
+
+        // Initialize the application when the page loads
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
